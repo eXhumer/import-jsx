@@ -3,9 +3,8 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import makeDir from 'make-dir';
 import findCacheDir from 'find-cache-dir';
-import packageConfig from './package.json' assert {type: 'json'};
+import packageConfig from './package.json' with {type: 'json'};
 
 const cacheDirectory = findCacheDir({name: 'import-jsx'}) || os.tmpdir();
 
@@ -41,7 +40,7 @@ const cachedTransform = async (
 
 	// Make sure the directory exists.
 	try {
-		await makeDir(directory);
+		await fs.mkdir(directory, {recursive: true});
 	} catch (error) {
 		if (fallback) {
 			return cachedTransform(transform, parameters, os.tmpdir());

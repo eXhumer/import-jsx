@@ -1,12 +1,11 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
 import crypto from 'node:crypto';
 import test from 'ava';
 import findCacheDir from 'find-cache-dir';
-import makeDir from 'make-dir';
-import {deleteAsync} from 'del';
 import {execa} from 'execa';
-import packageConfig from '../package.json' assert {type: 'json'};
+import packageConfig from '../package.json' with {type: 'json'};
 
 const cacheDirectory = findCacheDir({name: 'import-jsx'});
 
@@ -33,7 +32,7 @@ const importJsx = async (fixturePath, env) => {
 };
 
 const clearCache = () => {
-	return deleteAsync(cacheDirectory);
+	return fsPromises.rm(cacheDirectory, {recursive: true, force: true});
 };
 
 test.beforeEach(clearCache);
@@ -67,7 +66,7 @@ test('use disk cache', async t => {
 	const source = fs.readFileSync('test/fixtures/disk-cache.js', 'utf8');
 	const cacheKey = createCacheKey(source, packageConfig.version);
 
-	await makeDir(cacheDirectory);
+	await fsPromises.mkdir(cacheDirectory, {recursive: true});
 
 	fs.writeFileSync(
 		path.join(cacheDirectory, cacheKey),
@@ -96,7 +95,7 @@ test('avoid using disk cache when cache is disabled', async t => {
 	const source = fs.readFileSync('test/fixtures/disk-cache.js', 'utf8');
 	const cacheKey = createCacheKey(source, packageConfig.version);
 
-	await makeDir(cacheDirectory);
+	await fsPromises.mkdir(cacheDirectory, {recursive: true});
 
 	fs.writeFileSync(
 		path.join(cacheDirectory, cacheKey),
